@@ -38,29 +38,34 @@ async def send_messages():
 
     usernames = data.get("usernames", [])
     message = data.get("message", "")
+    schedule = data.get("schedule")
+    quantity = list(data.get("quantity"))
 
     if not usernames or not message:
         print("Список пользователей или сообщение пусты.")
         return
 
     print("Начинаем рассылку сообщений...")
-
-    for username in usernames:
-        try:
-            # Получаем сущность пользователя/чата
-            entity = await client.get_entity(username)
-            await client.send_message(entity, message)
-            print(f"Сообщение отправлено: {username}")
-            time.sleep(0.2)
-        except UsernameNotOccupiedError:
-            print(f"Ошибка: Пользователь или чат {username} не найден.")
-            time.sleep(0.2)
-        except PeerIdInvalidError:
-            print(f"Ошибка: Неверный ID для {username}.")
-            time.sleep(0.2)
-        except Exception as e:
-            print(f"Не удалось отправить сообщение для {username}: {e}")
-            time.sleep(0.2)
+    for i in quantity:
+        for username in usernames:
+            try:
+                # Получаем сущность пользователя/чата
+                entity = await client.get_entity(username)
+                await client.send_message(entity, message)
+                print(f"Сообщение отправлено: {username}")
+                time.sleep(0.2)
+            except UsernameNotOccupiedError:
+                print(f"Ошибка: Пользователь или чат {username} не найден.")
+                time.sleep(0.2)
+            except PeerIdInvalidError:
+                print(f"Ошибка: Неверный ID для {username}.")
+                time.sleep(0.2)
+            except Exception as e:
+                print(f"Не удалось отправить сообщение для {username}: {e}")
+                time.sleep(0.2)      
+        if quantity == 1:
+            break 
+        time.sleep(schedule*3600)
 
     print("Рассылка завершена!")
 
